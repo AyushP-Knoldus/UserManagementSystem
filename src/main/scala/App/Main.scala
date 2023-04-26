@@ -1,14 +1,15 @@
 package App
 
+import Database.UserDatabase
 import Model.User
 import Model.UserType.{Admin, Customer}
 import UserService.UserRepo
-
 import java.util.UUID
 
 object Main extends App {
 
-  private val userRepo = new UserRepo
+  private val userDB = new UserDatabase
+  private val userRepo = new UserRepo(userDB)
 
   //Create 2 users
   private val firstUser = User(UUID.randomUUID(), "Ayush", 23, "noida", "ayush.pathak@gmail.com", Admin)

@@ -1,10 +1,11 @@
 package Database
 
+import Dao.DAO
 import Model.User
 import java.util.UUID
 import scala.collection.mutable.ListBuffer
 
-class UserDatabase {
+class UserDatabase extends DAO {
 
   private val userList = ListBuffer.empty[User]
 

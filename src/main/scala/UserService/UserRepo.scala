@@ -1,12 +1,11 @@
 package UserService
 
-import Database.UserDatabase
+import Dao.DAO
 import Model.User
 import java.util.UUID
 
 
-class UserRepo {
-  private val userDB = new UserDatabase
+class UserRepo(userDB: DAO) {
 
   def add(user: User): String = userDB.add(user)
 

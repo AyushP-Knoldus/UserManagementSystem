@@ -6,3 +6,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "UserManagementSystem"
   )
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
+
+libraryDependencies += "org.mockito" % "mockito-scala-scalatest_2.13" % "1.17.12" % Test
