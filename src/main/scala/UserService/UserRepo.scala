@@ -2,36 +2,31 @@ package UserService
 
 import Dao.DAO
 import Model.User
-
+import scala.util.{Failure, Success}
 import java.util.UUID
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class UserRepo(userDB: DAO) {
 
-  def add(user: User): String = Await.result(userDB.add(user), 100.millisecond)
+  def add(user: User): Future[String] = userDB.add(user)
 
-  def getById(id: UUID): String = {
-    val userDetails = Await.result(userDB.getById(id), 100.millisecond)
-    userDetails match {
-      case Some(user) => s"id: ${user.id} ,Name: ${user.name} ,Age: ${user.age} ,Address: ${user.address} ,EmailId: ${user.emailId} ,UserType: ${user.userType}"
+  def getById(id: UUID): Future[Option[User]] = userDB.getById(id)
 
-      case None => s"Id $id not found in the db."
+  def getAll: Future[List[User]] = convertListBufferToList(userDB.getAll)
+
+  def updateById(id: UUID, newName: String): Future[String] = userDB.updateById(id, newName)
+
+  def deleteById(id: UUID): Future[String] = userDB.deleteById(id)
+
+  def deleteAll(): Future[List[User]] = convertListBufferToList(userDB.deleteAll())
+
+  private def convertListBufferToList(listFuture: Future[ListBuffer[User]]): Future[List[User]] = {
+    listFuture.transform {
+      case Success(value) => Success(value.toList)
+      case Failure(exception) => Failure(exception)
     }
-  }
-
-  def getAll: List[User] = {
-    val usersList = Await.result(userDB.getAll, 100.millisecond)
-    usersList.toList
-  }
-
-  def updateById(id: UUID, newName: String): String = Await.result(userDB.updateById(id, newName), 100.millisecond)
-
-  def deleteById(id: UUID): String = Await.result(userDB.deleteById(id), 100.millisecond)
-
-  def deleteAll(): List[User] = {
-    val usersList = Await.result(userDB.deleteAll(),100.millisecond)
-    usersList.toList
   }
 }

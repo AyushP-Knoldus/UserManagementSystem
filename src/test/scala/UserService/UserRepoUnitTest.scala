@@ -21,8 +21,11 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
     val user = User(UUID.randomUUID(), "Ayush", 25, "Noida", "ayush.pathak@gmail.com", Admin)
     when(mockUserDatabase.add(user)).thenReturn(Future("Added user Ayush to DB."))
 
-    assert(userRepo.add(user) == "Added user Ayush to DB.")
-    verify(mockUserDatabase).add(user)
+    val result = userRepo.add(user)
+    result.foreach { value =>
+      assert(value == "Added user Ayush to DB.")
+      verify(mockUserDatabase).add(user)
+    }
   }
 
   test("Get a user based on id from database") {
@@ -30,9 +33,17 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
     val user = User(id, "Ayush", 25, "Noida", "ayush.pathak@gmail.com", Admin)
     when(mockUserDatabase.getById(id)).thenReturn(Future(Some(user)))
 
-    assert(userRepo.getById(id) == s"id: $id ,Name: Ayush ,Age: 25 ,Address: Noida ,EmailId: ayush.pathak@gmail.com ,UserType: Admin")
+    userRepo.add(user)
+    val result = userRepo.getById(user.id)
+
+    val condition = false
+    result.foreach {
+      case Some(value) => assert(value == user)
+      case None => assert(condition)
+    }
     verify(mockUserDatabase).getById(id)
   }
+
   test("Get the list of users from database.") {
 
     val user = ListBuffer(
@@ -41,7 +52,10 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
     )
     when(mockUserDatabase.getAll).thenReturn(Future(user))
 
-    assert(userRepo.getAll == user.toList)
+    val result = userRepo.getAll
+    result.foreach { value =>
+      assert(value == user.toList)
+    }
     verify(mockUserDatabase).getAll
   }
 
@@ -50,7 +64,11 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
     val nameToBeUpdated = "Rahul"
     when(mockUserDatabase.updateById(id, nameToBeUpdated)).thenReturn(Future(s"Username updated at the id $id"))
 
-    assert(userRepo.updateById(id, nameToBeUpdated) == s"Username updated at the id $id")
+    val result = userRepo.updateById(id, nameToBeUpdated)
+
+    result.foreach { value =>
+      assert(value == s"Username updated at the id $id")
+    }
     verify(mockUserDatabase).updateById(id, nameToBeUpdated)
   }
 
@@ -58,14 +76,22 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
 
     when(mockUserDatabase.deleteById(id)).thenReturn(Future(s"User with ID $id deleted from DB."))
 
-    assert(userRepo.deleteById(id) == s"User with ID $id deleted from DB.")
+    val result = userRepo.deleteById(id)
+
+    result.foreach { value =>
+      assert(value == s"User with ID $id deleted from DB.")
+    }
     verify(mockUserDatabase).deleteById(id)
   }
 
   test("Delete all the users from the database.") {
     when(mockUserDatabase.deleteAll()).thenReturn(Future(ListBuffer.empty[User]))
 
-    assert(userRepo.deleteAll() == List.empty[User])
+    val result = userRepo.deleteAll()
+
+    result.foreach { value =>
+      assert(value == List.empty[User])
+    }
     verify(mockUserDatabase).deleteAll()
   }
 }

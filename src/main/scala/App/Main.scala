@@ -5,6 +5,8 @@ import Model.User
 import Model.UserType.{Admin, Customer}
 import UserService.UserRepo
 import java.util.UUID
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 object Main extends App {
 
@@ -14,16 +16,16 @@ object Main extends App {
   //Create 2 users
   private val firstUser = User(UUID.randomUUID(), "Ayush", 23, "noida", "ayush.pathak@gmail.com", Admin)
   private val secondUser = User(UUID.randomUUID(), "Sachin", 21, "Delhi", "sachin.sharma@gmail.com", Customer)
-  println(userRepo.add(firstUser))
-  println(userRepo.add(secondUser))
+  println(Await.result(userRepo.add(firstUser),100.millisecond))
+  println(Await.result(userRepo.add(secondUser),100.millisecond))
 
   //List all user
-  println(userRepo.getAll)
+  println(Await.result(userRepo.getAll, 500.millisecond))
 
   //Update Username of Admin
-  println(userRepo.updateById(firstUser.id, "Rahul"))
+  println(Await.result(userRepo.updateById(firstUser.id, "Rahul"),500.millisecond))
 
   //Delete Customer
-  println(userRepo.deleteById(secondUser.id))
+  println(Await.result(userRepo.deleteById(secondUser.id),500.millisecond))
 
 }
