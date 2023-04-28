@@ -6,7 +6,7 @@ import java.util.UUID
 import scala.util.{Success, Failure}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class UserDatabase extends DAO {
 
