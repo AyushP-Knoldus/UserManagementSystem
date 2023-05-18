@@ -1,9 +1,7 @@
 package Dao
 
 import Model.User
-
 import java.util.UUID
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait DAO {
@@ -11,12 +9,12 @@ trait DAO {
 
   def getById(id: UUID): Future[Option[User]]
 
-  def getAll: Future[ListBuffer[User]]
+  def getAll: Future[List[User]]
 
   def updateById(id: UUID, newName: String): Future[String]
 
   def deleteById(id: UUID): Future[String]
 
-  def deleteAll(): Future[ListBuffer[User]]
+  def deleteAll(): Future[String]
 
 }
