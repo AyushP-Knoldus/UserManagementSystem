@@ -30,7 +30,7 @@ class UserDatabase extends DAO {
 
         case Success(value) => value match {
 
-          case Left(value) if value > 0 => s"Added user ${user.name} with Id-> ${user.id} to Database."
+          case Left(rowsInserted) if rowsInserted > 0 => s"Added user ${user.name} with Id-> ${user.id} to Database."
         }
       }
     }
@@ -79,7 +79,7 @@ class UserDatabase extends DAO {
         case Failure(exception) => s"${exception.getMessage}"
 
         case Success(value) => value match {
-          case Left(value) if value > 0 => s"Updated entry at id ->$id in Database."
+          case Left(rowsInserted) if rowsInserted > 0 => s"Updated entry at id ->$id in Database."
         }
       }
     }
@@ -92,7 +92,7 @@ class UserDatabase extends DAO {
       } match {
         case Failure(exception) => s"${exception.getMessage}"
         case Success(value) => value match {
-          case Left(value) if value > 0 => s"Deleted entry with id ->$id from Database."
+          case Left(rowsInserted) if rowsInserted > 0 => s"Deleted entry with id ->$id from Database."
         }
       }
     }
