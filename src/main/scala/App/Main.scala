@@ -18,6 +18,7 @@ object Main extends App {
   //Create 2 users
   private val firstUser = User(UUID.randomUUID(), "Ayush", 23, "noida", "ayush.pathak@gmail.com", Admin)
   private val secondUser = User(UUID.randomUUID(), "Sachin", 21, "Delhi", "sachin.sharma@gmail.com", Customer)
+
   logger.info(Await.result(userRepo.add(firstUser), 2.second))
   logger.info(Await.result(userRepo.add(secondUser), 2.second))
 
@@ -27,7 +28,7 @@ object Main extends App {
   //Update Username of Admin
   logger.info(Await.result(userRepo.updateById(firstUser.id, "Rahul"), 2.second))
 
-  //Delete Customer
-  logger.info(Await.result(userRepo.deleteById(secondUser.id), 2.second))
+ //Delete Customer
+ logger.info(Await.result(userRepo.deleteById(secondUser.id), 2.second))
 
 }

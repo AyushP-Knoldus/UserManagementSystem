@@ -4,24 +4,25 @@ import Model.User
 import Model.UserType.{Admin, Customer}
 import org.scalatest.funsuite.AnyFunSuiteLike
 import java.util.UUID
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class UserDatabaseTest extends AnyFunSuiteLike {
+
   val userDb = new UserDatabase
   val user1: User = User(UUID.randomUUID(), "Ayush", 25, "Noida", "ayush.pathak@gmail.com", Admin)
   val user2: User = User(UUID.randomUUID(), "Sachin", 21, "Delhi", "sachin.sharma@gmail.com", Customer)
 
+  userDb.add(user1)
+
   test("Add a user to the database") {
-    val result = userDb.add(user1)
+    val result = userDb.add(user2)
 
     result.foreach { value =>
-      assert(value == "Added user Ayush to DB.")
+      assert(value == s"Added user ${user2.name} with Id-> ${user2.id} to Database.")
     }
   }
 
   test("Get a user by ID from the database") {
-    userDb.add(user1)
     val userDetailsFuture = userDb.getById(user1.id)
 
     userDetailsFuture.foreach { userDetails =>
@@ -30,18 +31,14 @@ class UserDatabaseTest extends AnyFunSuiteLike {
   }
 
   test("Get all users from the database") {
-    val userDb1 = new UserDatabase
-    userDb1.add(user1)
-    userDb1.add(user2)
-    val userListFuture = userDb1.getAll
+    val userListFuture = userDb.getAll
 
     userListFuture.foreach { userList =>
-      assert(userList == ListBuffer(user1, user2))
+      assert(userList == List(user1, user2))
     }
   }
 
   test("Update a user by ID in the database") {
-    userDb.add(user2)
     val updatedUserFuture = userDb.updateById(user2.id, "Rahul")
 
     updatedUserFuture.foreach { updatedUser =>
@@ -49,7 +46,6 @@ class UserDatabaseTest extends AnyFunSuiteLike {
     }
   }
   test("Delete a user by ID from the database") {
-    userDb.add(user2)
     val deletedUserFuture = userDb.deleteById(user2.id)
 
     deletedUserFuture.foreach { deletedUser =>
@@ -58,13 +54,10 @@ class UserDatabaseTest extends AnyFunSuiteLike {
   }
 
   test("Delete all users from the database") {
-    val userDb1 = new UserDatabase
-    userDb1.add(user1)
-    userDb1.add(user2)
-    val userListFuture = userDb1.deleteAll()
+    val result = userDb.deleteAll()
 
-    userListFuture.foreach { userList =>
-      assert(userList == ListBuffer.empty[User])
+    result.foreach { element =>
+      assert(element == "Deleted All entries in table.")
     }
   }
 }

@@ -6,7 +6,6 @@ import org.mockito.MockitoSugar._
 import Model.User
 import Model.UserType.{Admin, Customer}
 import java.util.UUID
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -19,11 +18,11 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
   test("Add user to database") {
 
     val user = User(UUID.randomUUID(), "Ayush", 25, "Noida", "ayush.pathak@gmail.com", Admin)
-    when(mockUserDatabase.add(user)).thenReturn(Future("Added user Ayush to DB."))
+    when(mockUserDatabase.add(user)).thenReturn(Future(s"Added user ${user.name} with Id-> ${user.id} to Database."))
 
     val result = userRepo.add(user)
     result.foreach { value =>
-      assert(value == "Added user Ayush to DB.")
+      assert(value == s"Added user ${user.name} with Id-> ${user.id} to Database.")
       verify(mockUserDatabase).add(user)
     }
   }
@@ -46,7 +45,7 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
 
   test("Get the list of users from database.") {
 
-    val user = ListBuffer(
+    val user = List(
       User(UUID.randomUUID(), "Ayush", 23, "noida", "ayush.pathak@gmail.com", Admin),
       User(UUID.randomUUID(), "Sachin", 21, "Delhi", "sachin.sharma@gmail.com", Customer)
     )
@@ -54,7 +53,7 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
 
     val result = userRepo.getAll
     result.foreach { value =>
-      assert(value == user.toList)
+      assert(value == user)
     }
     verify(mockUserDatabase).getAll
   }
@@ -62,36 +61,37 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
   test("Update user based on Id from database.") {
 
     val nameToBeUpdated = "Rahul"
-    when(mockUserDatabase.updateById(id, nameToBeUpdated)).thenReturn(Future(s"Username updated at the id $id"))
+    when(mockUserDatabase.updateById(id, nameToBeUpdated)).thenReturn(Future(s"Updated entry at id ->$id in Database."))
 
     val result = userRepo.updateById(id, nameToBeUpdated)
 
     result.foreach { value =>
-      assert(value == s"Username updated at the id $id")
+      assert(value == s"Updated entry at id ->$id in Database.")
     }
     verify(mockUserDatabase).updateById(id, nameToBeUpdated)
   }
 
   test("Delete a user based on Id from the database.") {
 
-    when(mockUserDatabase.deleteById(id)).thenReturn(Future(s"User with ID $id deleted from DB."))
+    when(mockUserDatabase.deleteById(id)).thenReturn(Future(s"Deleted entry with id ->$id from Database."))
 
     val result = userRepo.deleteById(id)
 
     result.foreach { value =>
-      assert(value == s"User with ID $id deleted from DB.")
+      assert(value == s"Deleted entry with id ->$id from Database.")
     }
     verify(mockUserDatabase).deleteById(id)
   }
 
   test("Delete all the users from the database.") {
-    when(mockUserDatabase.deleteAll()).thenReturn(Future(ListBuffer.empty[User]))
+    when(mockUserDatabase.deleteAll()).thenReturn(Future("Deleted All entries in table."))
 
     val result = userRepo.deleteAll()
 
     result.foreach { value =>
-      assert(value == List.empty[User])
+      assert(value == "Deleted All entries in table.")
     }
     verify(mockUserDatabase).deleteAll()
   }
 }
+

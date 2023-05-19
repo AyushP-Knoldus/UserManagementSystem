@@ -1,7 +1,6 @@
 package Database
 
 import com.typesafe.config.ConfigFactory
-
 import java.sql.{Connection, DriverManager}
 
 object Connection {
