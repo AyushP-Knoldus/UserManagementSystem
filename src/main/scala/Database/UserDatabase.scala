@@ -19,12 +19,10 @@ class UserDatabase extends DAO {
 
   def add(user: User): Future[String] = {
     Future {
-      Try {
-        executeQuery(
-          s"""INSERT INTO USER
-             |VALUES('${user.id.toString}','${user.name}','${user.age}','${user.address}','${user.emailId}','${user.userType.toString}')
-             |""".stripMargin)
-      }
+      executeQuery(
+        s"""INSERT INTO USER
+           |VALUES('${user.id.toString}','${user.name}','${user.age}','${user.address}','${user.emailId}','${user.userType.toString}')
+           |""".stripMargin)
       match {
         case Failure(exception) => s"${exception.getMessage}"
 
@@ -38,13 +36,13 @@ class UserDatabase extends DAO {
 
   override def getById(id: UUID): Future[Option[User]] = {
     Future {
-      Try {
-        executeQuery(s"SELECT * FROM USER WHERE Id = '${id.toString}'")
-      }
+      executeQuery(s"SELECT * FROM USER WHERE Id = '${id.toString}'")
       match {
         case Failure(exception) => logger.info(s"${exception.getMessage}")
           None
+
         case Success(value) => value match {
+
           case Right(resultSet) => displayUsers(resultSet, List.empty).headOption
         }
       }
@@ -53,14 +51,13 @@ class UserDatabase extends DAO {
 
   def getAll: Future[List[User]] = {
     Future {
-      Try {
-        executeQuery("SELECT * FROM USER")
-      }
+      executeQuery("SELECT * FROM USER")
       match {
         case Failure(exception) => logger.info(s"${exception.getMessage}")
           List.empty
 
         case Success(value) => value match {
+
           case Right(resultSet) => displayUsers(resultSet, List.empty)
         }
       }
@@ -69,16 +66,15 @@ class UserDatabase extends DAO {
 
   def updateById(id: UUID, newName: String): Future[String] = {
     Future {
-      Try {
-        executeQuery(
-          s"""UPDATE USER
-             | set Name = '$newName'
-             | where Id = '${id.toString}'""".stripMargin)
-      }
+      executeQuery(
+        s"""UPDATE USER
+           | set Name = '$newName'
+           | where Id = '${id.toString}'""".stripMargin)
       match {
         case Failure(exception) => s"${exception.getMessage}"
 
         case Success(value) => value match {
+
           case Left(rowsInserted) if rowsInserted > 0 => s"Updated entry at id ->$id in Database."
         }
       }
@@ -87,11 +83,12 @@ class UserDatabase extends DAO {
 
   def deleteById(id: UUID): Future[String] = {
     Future {
-      Try {
-        executeQuery(s"DELETE FROM USER where Id = '${id.toString}'")
-      } match {
+      executeQuery(s"DELETE FROM USER where Id = '${id.toString}'")
+      match {
         case Failure(exception) => s"${exception.getMessage}"
+
         case Success(value) => value match {
+
           case Left(rowsInserted) if rowsInserted > 0 => s"Deleted entry with id ->$id from Database."
         }
       }
@@ -100,9 +97,8 @@ class UserDatabase extends DAO {
 
   def deleteAll(): Future[String] = {
     Future {
-      Try {
-        executeQuery("TRUNCATE TABLE USER")
-      } match {
+      executeQuery("TRUNCATE TABLE USER")
+      match {
         case Failure(exception) => s"${exception.getMessage}"
         case Success(_) => s"Deleted All entries in table."
       }
@@ -129,22 +125,24 @@ class UserDatabase extends DAO {
     else resultList
   }
 
-  private def executeQuery(query: String): Either[Int, ResultSet] = {
-    if (connection.isDefined) {
+  private def executeQuery(query: String): Try[Either[Int, ResultSet]] = {
+    Try {
+      if (connection.isDefined) {
 
-      val statement = connection.get.createStatement()
-      val stackTrace = Thread.currentThread().getStackTrace
-      val callerMethod = stackTrace(2).getMethodName
+        val statement = connection.get.createStatement()
+        val stackTrace = Thread.currentThread().getStackTrace
+        val callerMethod = stackTrace(4).getMethodName
 
-      if (callerMethod.contains("getAll") || callerMethod.contains("getById"))
+        if (callerMethod.contains("getAll") || callerMethod.contains("getById"))
 
-        Right(statement.executeQuery(query))
+          Right(statement.executeQuery(query))
 
-      else
+        else
 
-        Left(statement.executeUpdate(query))
+          Left(statement.executeUpdate(query))
+      }
+
+      else throw new Exception("Unable to connect to database")
     }
-
-    else throw new Exception("Unable to connect to database")
   }
 }
