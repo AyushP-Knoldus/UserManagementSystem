@@ -25,39 +25,40 @@ class UserDatabaseTest extends AnyFunSuiteLike {
   test("Get a user by ID from the database") {
     val userDetailsFuture = userDb.getById(user1.id)
 
-    userDetailsFuture.foreach { userDetails =>
-      assert(userDetails.contains(user1))
+    userDetailsFuture.foreach {
+
+      case Right(userDetails) => assert(userDetails.contains(user1))
     }
   }
 
   test("Get all users from the database") {
     val userListFuture = userDb.getAll
 
-    userListFuture.foreach { userList =>
-      assert(userList == List(user1, user2))
+    userListFuture.foreach {
+      case Right(user) => assert(user == List(user1, user2))
     }
   }
 
-  test("Update a user by ID in the database") {
-    val updatedUserFuture = userDb.updateById(user2.id, "Rahul")
+    test("Update a user by ID in the database") {
+      val updatedUserFuture = userDb.updateById(user2.id, "Rahul")
 
-    updatedUserFuture.foreach { updatedUser =>
-      assert(updatedUser == s"Username updated at the id ${user2.id}")
+      updatedUserFuture.foreach { updatedUser =>
+        assert(updatedUser == s"Username updated at the id ${user2.id}")
+      }
     }
-  }
-  test("Delete a user by ID from the database") {
-    val deletedUserFuture = userDb.deleteById(user2.id)
+    test("Delete a user by ID from the database") {
+      val deletedUserFuture = userDb.deleteById(user2.id)
 
-    deletedUserFuture.foreach { deletedUser =>
-      assert(deletedUser == s"User with ID ${user2.id} deleted from DB.")
+      deletedUserFuture.foreach { deletedUser =>
+        assert(deletedUser == s"User with ID ${user2.id} deleted from DB.")
+      }
     }
-  }
 
-  test("Delete all users from the database") {
-    val result = userDb.deleteAll()
+    test("Delete all users from the database") {
+      val result = userDb.deleteAll()
 
-    result.foreach { element =>
-      assert(element == "Deleted All entries in table.")
+      result.foreach { element =>
+        assert(element == "Deleted All entries in table.")
+      }
     }
-  }
 }

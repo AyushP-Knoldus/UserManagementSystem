@@ -30,15 +30,15 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
   test("Get a user based on id from database") {
 
     val user = User(id, "Ayush", 25, "Noida", "ayush.pathak@gmail.com", Admin)
-    when(mockUserDatabase.getById(id)).thenReturn(Future(Some(user)))
+    when(mockUserDatabase.getById(id)).thenReturn(Future(Right(List(user))))
 
     userRepo.add(user)
     val result = userRepo.getById(user.id)
 
     val condition = false
     result.foreach {
-      case Some(value) => assert(value == user)
-      case None => assert(condition)
+      case Left(_) => assert(condition)
+      case Right(userdata) => assert(userdata.head == user)
     }
     verify(mockUserDatabase).getById(id)
   }
@@ -49,11 +49,11 @@ class UserRepoUnitTest extends AnyFunSuiteLike {
       User(UUID.randomUUID(), "Ayush", 23, "noida", "ayush.pathak@gmail.com", Admin),
       User(UUID.randomUUID(), "Sachin", 21, "Delhi", "sachin.sharma@gmail.com", Customer)
     )
-    when(mockUserDatabase.getAll).thenReturn(Future(user))
+    when(mockUserDatabase.getAll).thenReturn(Future(Right(user)))
 
     val result = userRepo.getAll
-    result.foreach { value =>
-      assert(value == user)
+    result.foreach {
+      case Right(userList) => assert(userList == user)
     }
     verify(mockUserDatabase).getAll
   }

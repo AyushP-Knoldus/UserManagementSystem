@@ -10,98 +10,57 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import org.slf4j.{Logger, LoggerFactory}
 
 class UserDatabase extends DAO {
 
   private val connection = establishConnectionWithMySql()
-  private val logger: Logger = LoggerFactory.getLogger(getClass)
 
   def add(user: User): Future[String] = {
     Future {
-      executeQuery(
+      handleExecuteUpdateQuery(
+        executeQuery(
         s"""INSERT INTO USER
            |VALUES('${user.id.toString}','${user.name}','${user.age}','${user.address}','${user.emailId}','${user.userType.toString}')
-           |""".stripMargin)
-      match {
-        case Failure(exception) => s"${exception.getMessage}"
-
-        case Success(value) => value match {
-
-          case Left(rowsInserted) if rowsInserted > 0 => s"Added user ${user.name} with Id-> ${user.id} to Database."
-        }
-      }
+           |""".stripMargin),s"Added user ${user.name} with Id-> ${user.id} to Database.")
     }
   }
 
-  override def getById(id: UUID): Future[Option[User]] = {
+  override def getById(id: UUID): Future[Either[String, List[User]]] = {
     Future {
-      executeQuery(s"SELECT * FROM USER WHERE Id = '${id.toString}'")
-      match {
-        case Failure(exception) => logger.info(s"${exception.getMessage}")
-          None
-
-        case Success(value) => value match {
-
-          case Right(resultSet) => displayUsers(resultSet, List.empty).headOption
-        }
-      }
+      handleExecuteQuery(
+        executeQuery(s"SELECT * FROM USER WHERE Id = '${id.toString}'"))
     }
   }
 
-  def getAll: Future[List[User]] = {
+  def getAll: Future[Either[String, List[User]]] = {
     Future {
-      executeQuery("SELECT * FROM USER")
-      match {
-        case Failure(exception) => logger.info(s"${exception.getMessage}")
-          List.empty
-
-        case Success(value) => value match {
-
-          case Right(resultSet) => displayUsers(resultSet, List.empty)
-        }
-      }
+      handleExecuteQuery(
+        executeQuery("SELECT * FROM USER"))
     }
   }
 
   def updateById(id: UUID, newName: String): Future[String] = {
     Future {
-      executeQuery(
+      handleExecuteUpdateQuery(
+        executeQuery(
         s"""UPDATE USER
            | set Name = '$newName'
-           | where Id = '${id.toString}'""".stripMargin)
-      match {
-        case Failure(exception) => s"${exception.getMessage}"
-
-        case Success(value) => value match {
-
-          case Left(rowsInserted) if rowsInserted > 0 => s"Updated entry at id ->$id in Database."
-        }
-      }
+           | where Id = '${id.toString}'""".stripMargin), s"Updated entry at id ->$id in Database.")
     }
   }
 
   def deleteById(id: UUID): Future[String] = {
     Future {
-      executeQuery(s"DELETE FROM USER where Id = '${id.toString}'")
-      match {
-        case Failure(exception) => s"${exception.getMessage}"
-
-        case Success(value) => value match {
-
-          case Left(rowsInserted) if rowsInserted > 0 => s"Deleted entry with id ->$id from Database."
-        }
-      }
+      handleExecuteUpdateQuery(
+        executeQuery(s"DELETE FROM USER where Id = '${id.toString}'"),
+        s"Deleted entry with id ->$id from Database.")
     }
   }
 
   def deleteAll(): Future[String] = {
     Future {
-      executeQuery("TRUNCATE TABLE USER")
-      match {
-        case Failure(exception) => s"${exception.getMessage}"
-        case Success(_) => s"Deleted All entries in table."
-      }
+      handleExecuteUpdateQuery(
+        executeQuery("TRUNCATE TABLE USER"), s"Deleted All entries in table.")
     }
   }
 
@@ -143,6 +102,28 @@ class UserDatabase extends DAO {
       }
 
       else throw new Exception("Unable to connect to database")
+    }
+  }
+
+  private def handleExecuteUpdateQuery(f: Try[Either[Int, ResultSet]], message: String): String = {
+    f match {
+      case Failure(exception) => s"${exception.getMessage}"
+
+      case Success(value) => value match {
+
+        case Left(_) => message
+      }
+    }
+  }
+
+  private def handleExecuteQuery(f: Try[Either[Int, ResultSet]]): Either[String, List[User]] = {
+    f match {
+      case Failure(exception) => Left(s"${exception.getMessage}")
+
+      case Success(value) => value match {
+
+        case Right(resultSet) => Right(displayUsers(resultSet, List.empty))
+      }
     }
   }
 }

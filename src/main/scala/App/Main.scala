@@ -23,7 +23,10 @@ object Main extends App {
   logger.info(Await.result(userRepo.add(secondUser), 2.second))
 
   //List all user
-  logger.info(Await.result(userRepo.getAll, 2.second).toString())
+  logger.info(Await.result(userRepo.getAll, 2.second) match {
+    case Left(message) => message
+    case Right(userList) => userList.toString()
+  })
 
   //Update Username of Admin
   logger.info(Await.result(userRepo.updateById(firstUser.id, "Rahul"), 2.second))

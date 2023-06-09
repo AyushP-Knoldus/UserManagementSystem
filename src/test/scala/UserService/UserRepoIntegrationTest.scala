@@ -30,8 +30,8 @@ class UserRepoIntegrationTest extends AnyFunSuiteLike {
     val condition = false
 
     result.foreach {
-      case Some(value) => assert(value == user2)
-      case None => assert(condition)
+      case Left(_) => assert(condition)
+      case Right(userdata) => assert(userdata == user2)
     }
   }
 
@@ -43,8 +43,8 @@ class UserRepoIntegrationTest extends AnyFunSuiteLike {
 
     val result = userRepo1.getAll
 
-    result.foreach { value =>
-      assert(value == List(user1, user2))
+    result.foreach {
+      case Right(userList) => assert(userList == List(user1, user2))
     }
   }
 
